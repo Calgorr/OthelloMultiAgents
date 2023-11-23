@@ -24,8 +24,9 @@ def load_images(transforms=[]):
             key = '_'.join(path[1:])
             if key not in image_dict:
                   image_dict[key] = []
-
-            for file in files:
+            
+            sorted_files = sorted(files)
+            for file in sorted_files:
                   file_path = os.path.join(root, file)
                   image = pygame.image.load(file_path)
                   for transform in transforms:
