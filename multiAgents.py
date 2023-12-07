@@ -1,6 +1,8 @@
 from Agents import Agent
 import util
 import random
+from Game import GameState
+
 
 class ReflexAgent(Agent):
     """
@@ -11,8 +13,9 @@ class ReflexAgent(Agent):
     it in any way you see fit, so long as you don't touch our method
     headers.
     """
+
     def __init__(self, *args, **kwargs) -> None:
-        self.index = 0 # your agent always has index 0
+        self.index = 0  # your agent always has index 0
 
     def getAction(self, gameState):
         """
@@ -28,8 +31,10 @@ class ReflexAgent(Agent):
         # Choose one of the best actions
         scores = [self.evaluationFunction(gameState, action) for action in legalMoves]
         bestScore = max(scores)
-        bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
-        chosenIndex = random.choice(bestIndices) # Pick randomly among the best
+        bestIndices = [
+            index for index in range(len(scores)) if scores[index] == bestScore
+        ]
+        chosenIndex = random.choice(bestIndices)  # Pick randomly among the best
 
         "Add more of your code here if you want to"
 
@@ -42,7 +47,9 @@ class ReflexAgent(Agent):
         You can try and change this evaluation function if you want but it is not necessary.
         """
         nextGameState = currentGameState.generateSuccessor(self.index, action)
-        return nextGameState.getScore(self.index) - currentGameState.getScore(self.index)
+        return nextGameState.getScore(self.index) - currentGameState.getScore(
+            self.index
+        )
 
 
 def scoreEvaluationFunction(currentGameState):
@@ -71,34 +78,62 @@ class MultiAgentSearchAgent(Agent):
     is another abstract class.
     """
 
-    def __init__(self, evalFn = 'scoreEvaluationFunction', depth = '2', **kwargs):
-        self.index = 0 # your agent always has index 0
+    def __init__(self, evalFn="scoreEvaluationFunction", depth="2", **kwargs):
+        self.index = 0  # your agent always has index 0
         self.evaluationFunction = util.lookup(evalFn, globals())
         self.depth = int(depth)
 
 
 class MinimaxAgent(MultiAgentSearchAgent):
-    """
-    Your minimax agent which extends MultiAgentSearchAgent and is supposed to be implementing a minimax tree with a certain depth.
-    """
-
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(**kwargs)
 
-    def getAction(self, state):
-        """
-        Returns the minimax action using self.depth and self.evaluationFunction
+    def getAction(self, state: GameState):
+        return self.minimax(state, 0, self.depth)[1]
 
-        But before getting your hands dirty, look at these functions:
+    def max_value(self, state: GameState, agentIndex, depth):
+        actions = []
+        for action in state.getLegalActions(agentIndex):
+            actions.append(
+                (
+                    self.minimax(
+                        state.generateSuccessor(agentIndex, action),
+                        agentIndex + 1,
+                        depth,
+                    )[0],
+                    action,
+                )
+            )
+        return max(actions)
 
-        gameState.isGameFinished() -> bool
-        gameState.getNumAgents() -> int
-        gameState.generateSuccessor(agentIndex, action) -> GameState
-        gameState.getLegalActions(agentIndex) -> list
-        self.evaluationFunction(gameState) -> float
-        """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+    def min_value(self, state: GameState, agentIndex, depth):
+        actions = []
+        for action in state.getLegalActions(agentIndex):
+            actions.append(
+                (
+                    self.minimax(
+                        state.generateSuccessor(agentIndex, action),
+                        agentIndex + 1,
+                        depth,
+                    )[0],
+                    action,
+                )
+            )
+        return min(actions)
+
+    def minimax(self, state: GameState, agentIndex, depth):
+        if state.isWin() or depth == 0:
+            return (self.evaluationFunction(state), "end")
+
+        agentsNum = state.getNumAgents()
+        agentIndex %= agentsNum
+        if agentIndex == agentsNum - 1:
+            depth -= 1
+
+        if agentIndex == 0:  # Our agent which is the maximizer
+            return self.max_value(state, agentIndex, depth)
+        else:  # Opponent agent which is the minimizer
+            return self.min_value(state, agentIndex, depth)
 
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
@@ -117,11 +152,11 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
-        
+
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
-      Your expectimax agent which has a max node for your agent but every other node is a chance node.
+    Your expectimax agent which has a max node for your agent but every other node is a chance node.
     """
 
     def __init__(self, *args, **kwargs) -> None:
@@ -149,14 +184,14 @@ def betterEvaluationFunction(currentGameState):
     The paper: Sannidhanam, Vaishnavi, and Muthukaruppan Annamalai. "An analysis of heuristics in othello." (2015).
 
     Here are also some functions you will need to use:
-    
+
     gameState.getPieces(index) -> list
     gameState.getCorners() -> 4-tuple
     gameState.getScore() -> list
     gameState.getScore(index) -> int
 
     """
-    
+
     "*** YOUR CODE HERE ***"
 
     # parity
@@ -166,8 +201,9 @@ def betterEvaluationFunction(currentGameState):
     # mobility
 
     # stability
-    
+
     util.raiseNotDefined()
+
 
 # Abbreviation
 better = betterEvaluationFunction
