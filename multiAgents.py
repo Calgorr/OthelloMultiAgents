@@ -264,24 +264,7 @@ def betterEvaluationFunction(currentGameState: GameState):
 
     The paper: Sannidhanam, Vaishnavi, and Muthukaruppan Annamalai. "An analysis of heuristics in othello." (2015).
 
-    Here are also some functions you will need to use:
-
-    gameState.getPieces(index) -> list
-    gameState.getCorners() -> 4-tuple
-    gameState.getScore() -> list
-    gameState.getScore(index) -> int
-
     """
-
-    "*** YOUR CODE HERE ***"
-
-    # parity
-
-    # corners
-
-    # mobility
-
-    # stability
 
     return (
         0.1 * coin_parity(currentGameState)
