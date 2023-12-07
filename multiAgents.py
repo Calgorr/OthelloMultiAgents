@@ -210,14 +210,48 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         super().__init__(**kwargs)
 
     def getAction(self, gameState):
-        """
-        Returns the expectimax action using self.depth and self.evaluationFunction
+        return self.Expectimax(gameState, 0, self.depth)[1]
 
-        All opponents should be modeled as choosing uniformly at random from their
-        legal moves.
-        """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+    def maxValue(self, gameState, agentIndex, depth):
+        actions = []
+        for action in gameState.getLegalActions(agentIndex):
+            actions.append(
+                (
+                    self.Expectimax(
+                        gameState.generateSuccessor(agentIndex, action),
+                        agentIndex + 1,
+                        depth,
+                    )[0],
+                    action,
+                )
+            )
+        return max(actions)
+
+    def minValue(self, gameState, agentIndex, depth):
+        actions = []
+        total = 0
+        for action in gameState.getLegalActions(agentIndex):
+            v = self.Expectimax(
+                gameState.generateSuccessor(agentIndex, action), agentIndex + 1, depth
+            )[0]
+            total += v
+            actions.append((v, action))
+
+        return (total / len(actions),)
+
+    def Expectimax(self, gameState, agentIndex, depth):
+        if gameState.isWin() or depth == 0:
+            return (self.evaluationFunction(gameState), "end")
+
+        agentsNum = gameState.getNumAgents()
+        agentIndex %= agentsNum
+        if agentIndex == agentsNum - 1:
+            depth -= 1
+
+        if agentIndex == 0:
+            return self.maxValue(gameState, agentIndex, depth)
+        else:
+            return self.minValue(gameState, agentIndex, depth)
 
 
 def betterEvaluationFunction(currentGameState):
