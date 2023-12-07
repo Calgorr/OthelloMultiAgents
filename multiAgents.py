@@ -254,7 +254,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             return self.minValue(gameState, agentIndex, depth)
 
 
-def betterEvaluationFunction(currentGameState):
+def betterEvaluationFunction(currentGameState: GameState):
     """
     Your extreme evaluation function.
 
@@ -283,8 +283,108 @@ def betterEvaluationFunction(currentGameState):
 
     # stability
 
-    util.raiseNotDefined()
+    return (
+        0.1 * coin_parity(currentGameState)
+        + 0.35 * corners_captured(currentGameState)
+        + 0.35 * mobility(currentGameState)
+        + 0.2 * stability(currentGameState)
+    )
 
 
 # Abbreviation
 better = betterEvaluationFunction
+
+
+def coin_parity(current_game_state: GameState):
+    result = 0
+    result += len(current_game_state.getPieces(0))
+    for i in range(1, current_game_state.getNumAgents()):
+        result -= len(current_game_state.getPieces(i))
+    return 100 * result
+
+
+def mobility(current_game_state: GameState):
+    actual_mobility = 0
+    for i in range(current_game_state.getNumAgents()):
+        actual_mobility += len(current_game_state.getLegalActions(i))
+    if actual_mobility != 0:
+        min_players_mobility = actual_mobility - len(
+            current_game_state.getLegalActions(0)
+        )
+        heuristic_mobility = (
+            len(current_game_state.getLegalActions(0)) - min_players_mobility
+        ) / actual_mobility
+        return 100 * heuristic_mobility
+    return 0
+
+
+def corners_captured(current_game_state: GameState):
+    max_players_corners = 0
+    min_players_corners = 0
+    current_game_state.getLegalActions(0)
+    for x, y in current_game_state.getLegalActions(0):
+        if (
+            (x == 0 and y == 0)
+            or (x == 0 and y == 7)
+            or (x == 7 and y == 0)
+            or (x == 7 and y == 7)
+        ):
+            max_players_corners += 1
+    for i in range(1, current_game_state.getNumAgents()):
+        for x, y in current_game_state.getLegalActions(i):
+            if (
+                (x == 0 and y == 0)
+                or (x == 0 and y == 7)
+                or (x == 7 and y == 0)
+                or (x == 7 and y == 7)
+            ):
+                min_players_corners += 1
+    if max_players_corners + min_players_corners != 0:
+        return (
+            100
+            * (max_players_corners - min_players_corners)
+            / (max_players_corners + min_players_corners)
+        )
+    return 0
+
+
+def stability(current_game_state: GameState):
+    corners = current_game_state.getCorners()
+    max_stable_pieces = 0
+    min_stable_pieces = 0
+    for i in corners:
+        if i == 0:
+            max_stable_pieces += 1
+        elif i != -1:
+            min_stable_pieces += 1
+    max_unstable_pieces = 0
+    min_unstbale_pieces = 0
+    for pos in current_game_state.getLegalActions(0):
+        for i in range(1, current_game_state.getNumAgents()):
+            if pos in current_game_state.getLegalActions(i):
+                max_unstable_pieces += 1
+    for i in range(1, current_game_state.getNumAgents()):
+        for pos in current_game_state.getLegalActions(i):
+            if pos in current_game_state.getLegalActions(0):
+                min_unstbale_pieces += 1
+    if (
+        max_stable_pieces
+        + min_stable_pieces
+        + max_unstable_pieces
+        + min_unstbale_pieces
+        != 0
+    ):
+        return (
+            100
+            * (
+                (max_stable_pieces - min_unstbale_pieces)
+                - (min_stable_pieces - min_unstbale_pieces)
+            )
+            / (
+                max_stable_pieces
+                + min_stable_pieces
+                + max_unstable_pieces
+                + min_unstbale_pieces
+            )
+        )
+    return 0
