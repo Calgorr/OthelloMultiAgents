@@ -2,6 +2,7 @@ from Agents import Agent
 import util
 import random
 from Game import GameState
+import sys
 
 
 class ReflexAgent(Agent):
@@ -125,9 +126,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
         if state.isWin() or depth == 0:
             return (self.evaluationFunction(state), "end")
 
-        agentsNum = state.getNumAgents()
-        agentIndex %= agentsNum
-        if agentIndex == agentsNum - 1:
+        agents_num = state.getNumAgents()
+        agentIndex %= agents_num
+        if agentIndex == agents_num - 1:
             depth -= 1
 
         if agentIndex == 0:  # Our agent which is the maximizer
@@ -147,11 +148,57 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     def getAction(self, gameState):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
-
-        You should keep track of alpha and beta in each node to be able to implement alpha-beta pruning.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.minimax(gameState, 0, self.depth)[1]
+
+    def maxValue(self, gameState, agentIndex, depth, alpha, beta):
+        actions = []
+        for action in gameState.getLegalActions(agentIndex):
+            v = self.minimax(
+                gameState.generateSuccessor(agentIndex, action),
+                agentIndex + 1,
+                depth,
+                alpha,
+                beta,
+            )[0]
+            actions.append((v, action))
+            if v > beta:
+                return (v, action)
+            alpha = max(alpha, v)
+        return max(actions)
+
+    def minValue(self, gameState, agentIndex, depth, alpha, beta):
+        actions = []
+        for action in gameState.getLegalActions(agentIndex):
+            v = self.minimax(
+                gameState.generateSuccessor(agentIndex, action),
+                agentIndex + 1,
+                depth,
+                alpha,
+                beta,
+            )[0]
+            actions.append((v, action))
+            if v < alpha:
+                return (v, action)
+            beta = min(beta, v)
+        return min(actions)
+
+    def minimax(
+        self, gameState, agentIndex, depth, alpha=-sys.maxsize - 1, beta=sys.maxsize
+    ):
+        if gameState.isWin() or depth == 0:
+            return (self.evaluationFunction(gameState), "end")
+
+        agents_num = gameState.getNumAgents()
+        agentIndex %= agents_num
+        if agentIndex == agents_num - 1:
+            depth -= 1
+
+        if agentIndex == 0:
+            return self.maxValue(gameState, agentIndex, depth, alpha, beta)
+        else:
+            return self.minValue(gameState, agentIndex, depth, alpha, beta)
 
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
