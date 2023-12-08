@@ -184,9 +184,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             beta = min(beta, v)
         return min(actions)
 
-    def minimax(
-        self, gameState, agentIndex, depth, alpha=-sys.maxsize - 1, beta=sys.maxsize
-    ):
+    def minimax(self, gameState, agentIndex, depth, alpha=-99999, beta=99999):
         if gameState.isWin() or depth == 0:
             return (self.evaluationFunction(gameState), "end")
 
@@ -274,7 +272,6 @@ def betterEvaluationFunction(currentGameState: GameState):
     )
 
 
-# Abbreviation
 better = betterEvaluationFunction
 
 
