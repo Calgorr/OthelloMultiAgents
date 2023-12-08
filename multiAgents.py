@@ -184,7 +184,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             beta = min(beta, v)
         return min(actions)
 
-    def minimax(self, gameState, agentIndex, depth, alpha=-99999, beta=99999):
+    def minimax(self, gameState, agentIndex, depth, alpha=-99999999, beta=99999999):
         if gameState.isWin() or depth == 0:
             return (self.evaluationFunction(gameState), "end")
 
